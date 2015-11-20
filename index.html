@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <title>Yaml by mikefarah</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Yaml</h1>
+        <h2>yaml is a command-line YAML processor</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/mikefarah/yaml/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/mikefarah/yaml/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/mikefarah/yaml" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>
+<a id="yaml" class="anchor" href="#yaml" aria-hidden="true"><span class="octicon octicon-link"></span></a>yaml</h1>
+
+<p>yaml is a lightweight and flexible command-line YAML processor</p>
+
+<p>The aim of the project is to be the <a href="https://github.com/stedolan/jq">jq</a> or sed of yaml files.</p>
+
+<h2>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h2>
+
+<ul>
+<li>Written in portable go, so you can download a lovely dependency free binary</li>
+<li>Deep read a yaml file with a given path</li>
+<li>Update a yaml file given a path</li>
+<li>Update a yaml file given a script file</li>
+<li>Convert from json to yaml</li>
+<li>Convert from yaml to json</li>
+</ul>
+
+<p><a href="https://github.com/mikefarah/yaml/releases/latest">Download latest binary</a> or alternatively:</p>
+
+<pre><code>go get github.com/mikefarah/yaml
+</code></pre>
+
+<h2>
+<a id="read-examples" class="anchor" href="#read-examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Read examples</h2>
+
+<pre><code>yaml r &lt;yaml file&gt; &lt;path&gt;
+</code></pre>
+
+<h3>
+<a id="basic" class="anchor" href="#basic" aria-hidden="true"><span class="octicon octicon-link"></span></a>Basic</h3>
+
+<p>Given a sample.yaml file of:</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-s"><span class="pl-ent">b:</span></span>
+  <span class="pl-c1"><span class="pl-ent">c:</span> 2</span></pre></div>
+
+<p>then</p>
+
+<div class="highlight highlight-source-shell"><pre>yaml r sample.yaml b.c</pre></div>
+
+<p>will output the value of '2'.</p>
+
+<h3>
+<a id="reading-from-stdin" class="anchor" href="#reading-from-stdin" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reading from STDIN</h3>
+
+<p>Given a sample.yaml file of:</p>
+
+<div class="highlight highlight-source-shell"><pre>cat sample.yaml <span class="pl-k">|</span> yaml r - b.c</pre></div>
+
+<p>will output the value of '2'.</p>
+
+<h3>
+<a id="splat" class="anchor" href="#splat" aria-hidden="true"><span class="octicon octicon-link"></span></a>Splat</h3>
+
+<p>Given a sample.yaml file of:</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-s">-<span class="pl-s">--</span></span>
+<span class="pl-s"><span class="pl-ent">bob:</span></span>
+  <span class="pl-s"><span class="pl-ent">item1:</span></span>
+    <span class="pl-s"><span class="pl-ent">cats:</span> <span class="pl-s">bananas</span></span>
+  <span class="pl-s"><span class="pl-ent">item2:</span></span>
+    <span class="pl-s"><span class="pl-ent">cats:</span> <span class="pl-s">apples</span></span></pre></div>
+
+<p>then</p>
+
+<div class="highlight highlight-source-shell"><pre>yaml r sample.yaml bob.<span class="pl-k">*</span>.cats</pre></div>
+
+<p>will output</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-s">- <span class="pl-s">bananas</span></span>
+<span class="pl-s">- <span class="pl-s">apples</span></span></pre></div>
+
+<h3>
+<a id="handling--in-the-yaml-key" class="anchor" href="#handling--in-the-yaml-key" aria-hidden="true"><span class="octicon octicon-link"></span></a>Handling '.' in the yaml key</h3>
+
+<p>Given a sample.yaml file of:</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-s"><span class="pl-ent">b.x:</span></span>
+  <span class="pl-c1"><span class="pl-ent">c:</span> 2</span></pre></div>
+
+<p>then</p>
+
+<div class="highlight highlight-source-shell"><pre>yaml r sample.yaml <span class="pl-cce">\"</span>b.x<span class="pl-cce">\"</span>.c</pre></div>
+
+<p>will output the value of '2'.</p>
+
+<h3>
+<a id="arrays" class="anchor" href="#arrays" aria-hidden="true"><span class="octicon octicon-link"></span></a>Arrays</h3>
+
+<p>You can give an index to access a specific element:
+e.g.: given a sample file of</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-s"><span class="pl-ent">b:</span></span>
+  <span class="pl-s"><span class="pl-ent">e:</span></span>
+    <span class="pl-s">- <span class="pl-ent">name:</span> <span class="pl-s">fred</span></span>
+      <span class="pl-c1"><span class="pl-ent">value:</span> 3</span>
+    <span class="pl-s">- <span class="pl-ent">name:</span> <span class="pl-s">sam</span></span>
+      <span class="pl-c1"><span class="pl-ent">value:</span> 4</span></pre></div>
+
+<p>then</p>
+
+<pre><code>yaml r sample.yaml b.e[1].name
+</code></pre>
+
+<p>will output 'sam'</p>
+
+<h3>
+<a id="array-splat" class="anchor" href="#array-splat" aria-hidden="true"><span class="octicon octicon-link"></span></a>Array Splat</h3>
+
+<p>e.g.: given a sample file of</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-s"><span class="pl-ent">b:</span></span>
+  <span class="pl-s"><span class="pl-ent">e:</span></span>
+    <span class="pl-s">- <span class="pl-ent">name:</span> <span class="pl-s">fred</span></span>
+      <span class="pl-c1"><span class="pl-ent">value:</span> 3</span>
+    <span class="pl-s">- <span class="pl-ent">name:</span> <span class="pl-s">sam</span></span>
+      <span class="pl-c1"><span class="pl-ent">value:</span> 4</span></pre></div>
+
+<p>then</p>
+
+<pre><code>yaml r sample.yaml b.e[*].name
+</code></pre>
+
+<p>will output:</p>
+
+<pre><code>- fred
+- sam
+</code></pre>
+
+<h2>
+<a id="update-examples" class="anchor" href="#update-examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Update examples</h2>
+
+<h3>
+<a id="update-to-stdout" class="anchor" href="#update-to-stdout" aria-hidden="true"><span class="octicon octicon-link"></span></a>Update to stdout</h3>
+
+<p>Given a sample.yaml file of:</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-s"><span class="pl-ent">b:</span></span>
+  <span class="pl-c1"><span class="pl-ent">c:</span> 2</span></pre></div>
+
+<p>then</p>
+
+<div class="highlight highlight-source-shell"><pre>yaml w sample.yaml b.c cat</pre></div>
+
+<p>will output:</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-s"><span class="pl-ent">b:</span></span>
+  <span class="pl-s"><span class="pl-ent">c:</span> <span class="pl-s">cat</span></span></pre></div>
+
+<h3>
+<a id="updating-yaml-in-place" class="anchor" href="#updating-yaml-in-place" aria-hidden="true"><span class="octicon octicon-link"></span></a>Updating yaml in-place</h3>
+
+<p>Given a sample.yaml file of:</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-s"><span class="pl-ent">b:</span></span>
+  <span class="pl-c1"><span class="pl-ent">c:</span> 2</span></pre></div>
+
+<p>then</p>
+
+<div class="highlight highlight-source-shell"><pre>yaml w -i sample.yaml b.c cat</pre></div>
+
+<p>will update the sample.yaml file so that the value of 'c' is cat.</p>
+
+<h3>
+<a id="updating-multiple-values-with-a-script" class="anchor" href="#updating-multiple-values-with-a-script" aria-hidden="true"><span class="octicon octicon-link"></span></a>Updating multiple values with a script</h3>
+
+<p>Given a sample.yaml file of:</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-s"><span class="pl-ent">b:</span></span>
+  <span class="pl-c1"><span class="pl-ent">c:</span> 2</span>
+  <span class="pl-s"><span class="pl-ent">e:</span></span>
+    <span class="pl-s">- <span class="pl-ent">name:</span> <span class="pl-s">Billy Bob</span></span></pre></div>
+
+<p>and a script update_instructions.yaml of:</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-c1"><span class="pl-ent">b.c:</span> 3</span>
+<span class="pl-s"><span class="pl-ent">b.e[0].name:</span> <span class="pl-s">Howdy Partner</span></span></pre></div>
+
+<p>then</p>
+
+<div class="highlight highlight-source-shell"><pre>yaml w -s update_instructions.yaml sample.yaml</pre></div>
+
+<p>will output:</p>
+
+<div class="highlight highlight-source-yaml"><pre><span class="pl-s"><span class="pl-ent">b:</span></span>
+  <span class="pl-c1"><span class="pl-ent">c:</span> 3</span>
+  <span class="pl-s"><span class="pl-ent">e:</span></span>
+    <span class="pl-s">- <span class="pl-ent">name:</span> <span class="pl-s">Howdy Partner</span></span></pre></div>
+
+<h2>
+<a id="converting-to-and-from-json" class="anchor" href="#converting-to-and-from-json" aria-hidden="true"><span class="octicon octicon-link"></span></a>Converting to and from json</h2>
+
+<h3>
+<a id="yaml2json" class="anchor" href="#yaml2json" aria-hidden="true"><span class="octicon octicon-link"></span></a>Yaml2json</h3>
+
+<p>To convert output to json, use the --tojson (or -j) flag. This can be used with any command.</p>
+
+<h3>
+<a id="json2yaml" class="anchor" href="#json2yaml" aria-hidden="true"><span class="octicon octicon-link"></span></a>json2yaml</h3>
+
+<p>To read in json, use the --fromjson (or -J) flag. This can be used with any command.</p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
